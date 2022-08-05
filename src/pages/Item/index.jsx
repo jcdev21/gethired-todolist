@@ -4,36 +4,157 @@ import {
 	IconButton,
 	Image,
 	Input,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
 	Text,
 	useDisclosure,
 } from '@chakra-ui/react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getDetail, update as updateActivity } from '../../api/activity';
+import { store, update } from '../../api/todo';
 import { IconPlus, IconSort } from '../../components/Icons';
-import { ModalDelete } from '../../components/Modals';
+import { ModalDelete, ModalForm } from '../../components/Modals';
+import TodoItem from '../../components/TodoItem';
+import { sortList as initialSortList } from '../../constants/sort';
 
 export default function Item() {
-	const [activity, setActivity] = React.useState({
-		created_at: '2022-08-04T15:18:46.000Z',
-		id: 23749456,
-		title: 'New Activity 1',
-	});
-	const [todoSelected, setTodoSelected] = React.useState({
-		activity_group_id: 23749456,
-		id: 16545,
-		is_active: 1,
-		priority: 'very-high',
-		title: 'testing',
-	});
+	let params = useParams();
+	let { id } = params;
+	const [activity, setActivity] = React.useState({});
+	const [todoSelected, setTodoSelected] = React.useState({});
 	const [todos, setTodos] = React.useState([]);
 	const [changeTitle, setChangeTitle] = React.useState(false);
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const [sortList, setSortList] = React.useState(initialSortList);
+	const {
+		isOpen: isOpenModalDelete,
+		onOpen: onOpenModalDelete,
+		onClose: onCloseModalDelete,
+	} = useDisclosure();
+	const {
+		isOpen: isOpenModalForm,
+		onOpen: onOpenModalForm,
+		onClose: onCloseModalForm,
+	} = useDisclosure();
 	let navigate = useNavigate();
+
+	const handleChangeTitle = (e) => {
+		setActivity((activity) => ({ ...activity, title: e.target.value }));
+	};
+
+	const handleUpdateActivity = async () => {
+		try {
+			await updateActivity(id, activity.title);
+			setChangeTitle(false);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const handleClickDelete = (data) => {
+		setTodoSelected(data);
+		onOpenModalDelete();
+	};
 
 	const handleDelete = () => {
 		console.log(todoSelected);
-		onClose();
+		onCloseModalDelete();
 	};
+
+	const handleSort = (sortTitle) => {
+		const tempTodo = todos;
+		let result = [];
+
+		if (sortTitle === 'Terbaru') {
+			result = tempTodo.sort((a, b) => b.id - a.id);
+		} else if (sortTitle === 'Terlama') {
+			result = tempTodo.sort((a, b) => a.id - b.id);
+		} else if (sortTitle === 'A-Z') {
+			result = tempTodo.sort((a, b) => {
+				if (a.title < b.title) return -1;
+				if (a.title > b.title) return 1;
+				return 0;
+			});
+		} else if (sortTitle === 'Z-A') {
+			result = tempTodo.sort((a, b) => {
+				if (a.title < b.title) return 1;
+				if (a.title > b.title) return -1;
+				return 0;
+			});
+		} else if (sortTitle === 'Belum Selesai') {
+			result = tempTodo.sort((a, b) => a.is_active - b.is_active);
+		}
+
+		const newSortList = sortList.map((sort, i) => {
+			if (sortTitle === sort.title) {
+				return {
+					...sort,
+					isChecked: true,
+				};
+			} else {
+				return {
+					...sort,
+					isChecked: false,
+				};
+			}
+		});
+
+		setTodos([...result]);
+		setSortList(newSortList);
+	};
+
+	const handleCheck = async (idTodo) => {
+		const idx = todos.findIndex((todo) => todo.id === idTodo);
+		const tempTodo = todos;
+		tempTodo[idx].is_active = !tempTodo[idx].is_active;
+		setTodos([...tempTodo]);
+
+		try {
+			await update(tempTodo[idx].id, {
+				is_active: tempTodo[idx].is_active,
+			});
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const handleModalForm = (data) => {
+		setTodoSelected(data);
+		onOpenModalForm();
+	};
+
+	const handleActionModalForm = async (dataForm) => {
+		// console.log(todoSelected);
+		onCloseModalForm();
+		try {
+			if (todoSelected.id) await update(todoSelected.id, dataForm);
+			else
+				await store({
+					...dataForm,
+					activity_group_id: id,
+				});
+			await getDetailActivity();
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const getDetailActivity = React.useCallback(async () => {
+		try {
+			const { data } = await getDetail(id);
+			const { todo_items, ...activity } = data;
+			setActivity({ ...activity });
+			setTodos([...todo_items]);
+		} catch (error) {
+			console.log(error);
+		}
+	}, [id]);
+
+	React.useEffect(() => {
+		getDetailActivity();
+	}, [getDetailActivity]);
 
 	return (
 		<>
@@ -53,13 +174,16 @@ export default function Item() {
 					/>
 					{changeTitle ? (
 						<Input
+							autoFocus
 							variant="flushed"
 							width="md"
 							fontSize="36px"
 							fontWeight="bold"
 							lineHeight="54px"
 							focusBorderColor="#111111"
-							onBlur={() => setChangeTitle(false)}
+							value={activity.title}
+							onChange={(e) => handleChangeTitle(e)}
+							onBlur={handleUpdateActivity}
 						/>
 					) : (
 						<Text
@@ -79,15 +203,44 @@ export default function Item() {
 					/>
 				</Box>
 				<Box display="flex" gap="18px">
-					<IconButton
-						colorScheme="grey"
-						aria-label="sort"
-						icon={<IconSort />}
-						w="54px"
-						h="54px"
-						border={`1px solid #E5E5E5`}
-						borderRadius="50%"
-					/>
+					<Menu>
+						<MenuButton
+							as={IconButton}
+							icon={<IconSort />}
+							colorScheme="grey"
+							aria-label="sort"
+							w="54px"
+							h="54px"
+							border={`1px solid #E5E5E5`}
+							borderRadius="50%"
+						/>
+						<MenuList width="235px">
+							{sortList.map((sort) => (
+								<MenuItem
+									key={sort.title}
+									display="flex"
+									justifyContent="space-between"
+									alignItems="center"
+									px="21px"
+									py="17px"
+									onClick={() => handleSort(sort.title)}
+								>
+									<Box display="flex" alignItems="center">
+										<Image
+											src={sort.icon}
+											mr="15px"
+											width="18px"
+											height="18px"
+										/>
+										<Text>{sort.title}</Text>
+									</Box>
+									{sort.isChecked && (
+										<Image src="/static/icons/checked.svg" />
+									)}
+								</MenuItem>
+							))}
+						</MenuList>
+					</Menu>
 					<Button
 						data-cy="activity-add-button"
 						minW="150px"
@@ -100,14 +253,23 @@ export default function Item() {
 						px="22px"
 						py="13.5px"
 						leftIcon={<IconPlus />}
+						onClick={() => handleModalForm({})}
 					>
 						Tambah
 					</Button>
 				</Box>
 			</Box>
-			<Box>
+			<Box marginBottom="50px">
 				{todos.length > 0 ? (
-					todos.map((data, i) => <Box>OKE</Box>)
+					todos.map((data, i) => (
+						<TodoItem
+							key={data.id}
+							handleCheck={handleCheck}
+							{...data}
+							handleDelete={handleClickDelete}
+							handleEdit={() => handleModalForm(data)}
+						/>
+					))
 				) : (
 					<Box
 						data-cy="activity-empty-state"
@@ -117,17 +279,24 @@ export default function Item() {
 						<Image
 							src="/static/images/todo-empty-state.png"
 							alt="activity-empty-state"
-							marginBottom="50px"
+							onClick={() => handleModalForm({})}
 						/>
 					</Box>
 				)}
 			</Box>
 			<ModalDelete
-				isOpen={isOpen}
-				onClose={onClose}
+				isOpen={isOpenModalDelete}
+				onClose={onCloseModalDelete}
 				onAction={handleDelete}
 				content={`Apakah anda yakin menghapus List Item<br />
 				<strong>“${todoSelected?.title}”?</strong>`}
+			/>
+			<ModalForm
+				isOpen={isOpenModalForm}
+				onClose={onCloseModalForm}
+				onAction={handleActionModalForm}
+				data={todoSelected}
+				type={Object.keys(todoSelected).length ? 'edit' : 'add'}
 			/>
 		</>
 	);

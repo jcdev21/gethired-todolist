@@ -8,6 +8,14 @@ export const global = {
 
 export const colors = {
 	prime: {
+		100: '#16ABF8',
+		200: '#16ABF8',
+		300: '#16ABF8',
+		400: '#16ABF8',
+		500: '#16ABF8',
+		600: '#16ABF8',
+		700: '#16ABF8',
+		800: '#16ABF8',
 		900: '#16ABF8',
 	},
 };

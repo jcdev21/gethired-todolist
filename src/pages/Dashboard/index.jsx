@@ -3,6 +3,10 @@ import {
 	Button,
 	Grid,
 	Image,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalOverlay,
 	Text,
 	useDisclosure,
 } from '@chakra-ui/react';
@@ -11,28 +15,17 @@ import { IconPlus } from '../../components/Icons';
 import Card from '../../components/Card';
 import { useNavigate } from 'react-router-dom';
 import { ModalDelete } from '../../components/Modals';
+import { destroy, getAll, store } from '../../api/activity';
 
 export default function Dashboard() {
-	console.log('DASHBOARD');
-	const [dataActivity, setDataActivity] = React.useState([
-		{
-			created_at: '2022-08-04T15:18:48.000Z',
-			id: 23749458,
-			title: 'New Activity 3',
-		},
-		{
-			created_at: '2022-08-04T15:18:47.000Z',
-			id: 23749457,
-			title: 'New Activity 2',
-		},
-		{
-			created_at: '2022-08-04T15:18:46.000Z',
-			id: 23749456,
-			title: 'New Activity 1',
-		},
-	]);
+	const [dataActivity, setDataActivity] = React.useState([]);
 	const [dataSelected, setDataSelected] = React.useState({});
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const {
+		isOpen: isOpenAlert,
+		onOpen: onOpenAlert,
+		onClose: onCloseAlert,
+	} = useDisclosure();
 	let navigate = useNavigate();
 
 	const handleClickDelete = (e, data) => {
@@ -41,10 +34,38 @@ export default function Dashboard() {
 		onOpen();
 	};
 
-	const handleDelete = () => {
-		console.log(dataSelected);
+	const handleDelete = async () => {
 		onClose();
+		try {
+			await destroy(dataSelected.id);
+			await getActivities();
+			onOpenAlert();
+		} catch (error) {
+			console.log(error);
+		}
 	};
+
+	const handleAdd = async () => {
+		try {
+			await store('New Activity');
+			await getActivities();
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const getActivities = React.useCallback(async () => {
+		try {
+			const { data } = await getAll();
+			setDataActivity([...data.data]);
+		} catch (error) {
+			console.log(error);
+		}
+	}, []);
+
+	React.useEffect(() => {
+		getActivities();
+	}, [getActivities]);
 
 	return (
 		<>
@@ -69,6 +90,7 @@ export default function Dashboard() {
 					px="22px"
 					py="13.5px"
 					leftIcon={<IconPlus />}
+					onClick={handleAdd}
 				>
 					Tambah
 				</Button>
@@ -79,6 +101,7 @@ export default function Dashboard() {
 				}
 				rowGap="26px"
 				columnGap="20px"
+				marginBottom="50px"
 			>
 				{dataActivity.length > 0 ? (
 					dataActivity.map((data, i) => (
@@ -137,7 +160,7 @@ export default function Dashboard() {
 						<Image
 							src="/static/images/activity-empty-state.png"
 							alt="activity-empty-state"
-							marginBottom="50px"
+							onClick={handleAdd}
 						/>
 					</Box>
 				)}
@@ -149,6 +172,19 @@ export default function Dashboard() {
 				content={`Apakah anda yakin menghapus activity<br />
 				<strong>“${dataSelected?.title}”?</strong>`}
 			/>
+			<Modal
+				data-cy="modal-information"
+				isOpen={isOpenAlert}
+				onClose={onCloseAlert}
+				isCentered
+			>
+				<ModalOverlay />
+				<ModalContent minH={'58px'} minW="490px">
+					<ModalBody display="flex" alignItems={'center'}>
+						<Text>Activity berhasil dihapus</Text>
+					</ModalBody>
+				</ModalContent>
+			</Modal>
 		</>
 	);
 }
