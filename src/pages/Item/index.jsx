@@ -8,19 +8,21 @@ import {
 	MenuButton,
 	MenuItem,
 	MenuList,
+	Spinner,
 	Text,
 	useDisclosure,
 } from '@chakra-ui/react';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getDetail, update as updateActivity } from '../../api/activity';
-import { store, update } from '../../api/todo';
+import { destroy, store, update } from '../../api/todo';
 import { IconPlus, IconSort } from '../../components/Icons';
 import { ModalDelete, ModalForm } from '../../components/Modals';
 import TodoItem from '../../components/TodoItem';
 import { sortList as initialSortList } from '../../constants/sort';
 
 export default function Item() {
+	console.log('iiiiiEm');
 	let params = useParams();
 	let { id } = params;
 	const [activity, setActivity] = React.useState({});
@@ -28,6 +30,7 @@ export default function Item() {
 	const [todos, setTodos] = React.useState([]);
 	const [changeTitle, setChangeTitle] = React.useState(false);
 	const [sortList, setSortList] = React.useState(initialSortList);
+	const [loading, setLoading] = React.useState(true);
 	const {
 		isOpen: isOpenModalDelete,
 		onOpen: onOpenModalDelete,
@@ -58,9 +61,14 @@ export default function Item() {
 		onOpenModalDelete();
 	};
 
-	const handleDelete = () => {
-		console.log(todoSelected);
+	const handleDelete = async () => {
 		onCloseModalDelete();
+		try {
+			await destroy(todoSelected.id);
+			await getDetailActivity();
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 	const handleSort = (sortTitle) => {
@@ -147,7 +155,9 @@ export default function Item() {
 			const { todo_items, ...activity } = data;
 			setActivity({ ...activity });
 			setTodos([...todo_items]);
+			setLoading(false);
 		} catch (error) {
+			setLoading(false);
 			console.log(error);
 		}
 	}, [id]);
@@ -166,6 +176,7 @@ export default function Item() {
 			>
 				<Box display="flex" gap="19px" alignItems="center">
 					<Image
+						data-cy="todo-back-button"
 						src="/static/icons/todo-back-button.svg"
 						alt="todo-back-button"
 						width="24px"
@@ -187,7 +198,7 @@ export default function Item() {
 						/>
 					) : (
 						<Text
-							data-cy="activity-title"
+							data-cy="todo-title"
 							textStyle="h1"
 							onClick={() => setChangeTitle(true)}
 						>
@@ -195,6 +206,7 @@ export default function Item() {
 						</Text>
 					)}
 					<Image
+						data-cy="todo-title-edit-button"
 						src="/static/icons/todo-title-edit-button.svg"
 						alt="todo-title-edit-button"
 						width="24px"
@@ -205,6 +217,7 @@ export default function Item() {
 				<Box display="flex" gap="18px">
 					<Menu>
 						<MenuButton
+							data-cy="todo-sort-button"
 							as={IconButton}
 							icon={<IconSort />}
 							colorScheme="grey"
@@ -217,6 +230,7 @@ export default function Item() {
 						<MenuList width="235px">
 							{sortList.map((sort) => (
 								<MenuItem
+									data-cy={sort.dataCy}
 									key={sort.title}
 									display="flex"
 									justifyContent="space-between"
@@ -242,7 +256,7 @@ export default function Item() {
 						</MenuList>
 					</Menu>
 					<Button
-						data-cy="activity-add-button"
+						data-cy="todo-add-button"
 						minW="150px"
 						height="54px"
 						bg={'prime.900'}
@@ -259,31 +273,38 @@ export default function Item() {
 					</Button>
 				</Box>
 			</Box>
-			<Box marginBottom="50px">
-				{todos.length > 0 ? (
-					todos.map((data, i) => (
-						<TodoItem
-							key={data.id}
-							handleCheck={handleCheck}
-							{...data}
-							handleDelete={handleClickDelete}
-							handleEdit={() => handleModalForm(data)}
-						/>
-					))
-				) : (
-					<Box
-						data-cy="activity-empty-state"
-						display="flex"
-						justifyContent="center"
-					>
-						<Image
-							src="/static/images/todo-empty-state.png"
-							alt="activity-empty-state"
-							onClick={() => handleModalForm({})}
-						/>
-					</Box>
-				)}
-			</Box>
+			{loading ? (
+				<Box display="flex" justifyContent="center">
+					<Spinner color="prime.900" size="lg" />
+				</Box>
+			) : (
+				<Box marginBottom="50px">
+					{todos.length > 0 ? (
+						todos.map((data, i) => (
+							<TodoItem
+								dataCy={`todo-item-${i}`}
+								key={data.id}
+								handleCheck={handleCheck}
+								{...data}
+								handleDelete={handleClickDelete}
+								handleEdit={() => handleModalForm(data)}
+							/>
+						))
+					) : (
+						<Box
+							data-cy="todo-empty-state"
+							display="flex"
+							justifyContent="center"
+						>
+							<Image
+								src="/static/images/todo-empty-state.png"
+								alt="todo-empty-state"
+								onClick={() => handleModalForm({})}
+							/>
+						</Box>
+					)}
+				</Box>
+			)}
 			<ModalDelete
 				isOpen={isOpenModalDelete}
 				onClose={onCloseModalDelete}

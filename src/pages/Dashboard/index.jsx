@@ -7,6 +7,7 @@ import {
 	ModalBody,
 	ModalContent,
 	ModalOverlay,
+	Spinner,
 	Text,
 	useDisclosure,
 } from '@chakra-ui/react';
@@ -21,6 +22,7 @@ export default function Dashboard() {
 	const [dataActivity, setDataActivity] = React.useState([]);
 	const [dataSelected, setDataSelected] = React.useState({});
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const [loading, setLoading] = React.useState(true);
 	const {
 		isOpen: isOpenAlert,
 		onOpen: onOpenAlert,
@@ -58,7 +60,9 @@ export default function Dashboard() {
 		try {
 			const { data } = await getAll();
 			setDataActivity([...data.data]);
+			setLoading(false);
 		} catch (error) {
+			setLoading(false);
 			console.log(error);
 		}
 	}, []);
@@ -95,76 +99,89 @@ export default function Dashboard() {
 					Tambah
 				</Button>
 			</Box>
-			<Grid
-				templateColumns={
-					dataActivity.length > 0 ? `repeat(4, 1fr)` : '1fr'
-				}
-				rowGap="26px"
-				columnGap="20px"
-				marginBottom="50px"
-			>
-				{dataActivity.length > 0 ? (
-					dataActivity.map((data, i) => (
-						<Card
-							dataCy={`activity-item-${i}`}
-							handleClick={() =>
-								navigate(`/item-list/${data.id}`)
-							}
-							key={data.id}
-						>
-							<Text data-cy="activity-item-title" textStyle="h3">
-								{data.title}
-							</Text>
-							<Box
-								display="inline-flex"
-								justifyContent="space-between"
-								alignItems="center"
-								bg="white"
+			{loading ? (
+				<Box display="flex" justifyContent="center">
+					<Spinner color="prime.900" size="lg" />
+				</Box>
+			) : (
+				<Grid
+					templateColumns={
+						dataActivity.length > 0 ? `repeat(4, 1fr)` : '1fr'
+					}
+					rowGap="26px"
+					columnGap="20px"
+					marginBottom="50px"
+				>
+					{dataActivity.length > 0 ? (
+						dataActivity.map((data, i) => (
+							<Card
+								dataCy={`activity-item-${i}`}
+								handleClick={() =>
+									navigate(`/item-list/${data.id}`)
+								}
+								key={data.id}
 							>
 								<Text
-									data-cy="activity-item-date"
-									as="span"
-									fontSize="14px"
-									fontWeight="medium"
-									color="#888888"
-									cursor="text"
+									data-cy="activity-item-title"
+									textStyle="h3"
 								>
-									{`
+									{data.title}
+								</Text>
+								<Box
+									display="inline-flex"
+									justifyContent="space-between"
+									alignItems="center"
+									bg="white"
+								>
+									<Text
+										data-cy="activity-item-date"
+										as="span"
+										fontSize="14px"
+										fontWeight="medium"
+										color="#888888"
+										cursor="text"
+									>
+										{`
 										${new Date(data.created_at).toLocaleString('id', {
 											day: '2-digit',
 										})} ${new Date(
-										data.created_at
-									).toLocaleString('id', {
-										month: 'long',
-									})} ${new Date(
-										data.created_at
-									).toLocaleString('id', { year: 'numeric' })}
+											data.created_at
+										).toLocaleString('id', {
+											month: 'long',
+										})} ${new Date(
+											data.created_at
+										).toLocaleString('id', {
+											year: 'numeric',
+										})}
 									`}
-								</Text>
-								<Image
-									data-cy="activity-item-delete-button"
-									src="/static/icons/delete.svg"
-									alt="title"
-									cursor="pointer"
-									onClick={(e) => handleClickDelete(e, data)}
-								/>
-							</Box>
-						</Card>
-					))
-				) : (
-					<Box
-						data-cy="activity-empty-state"
-						display="flex"
-						justifyContent="center"
-					>
-						<Image
-							src="/static/images/activity-empty-state.png"
-							alt="activity-empty-state"
-							onClick={handleAdd}
-						/>
-					</Box>
-				)}
-			</Grid>
+									</Text>
+									<Image
+										data-cy="activity-item-delete-button"
+										src="/static/icons/delete.svg"
+										alt="title"
+										cursor="pointer"
+										onClick={(e) =>
+											handleClickDelete(e, data)
+										}
+									/>
+								</Box>
+							</Card>
+						))
+					) : (
+						<Box
+							data-cy="activity-empty-state"
+							display="flex"
+							justifyContent="center"
+						>
+							<Image
+								src="/static/images/activity-empty-state.png"
+								alt="activity-empty-state"
+								onClick={handleAdd}
+							/>
+						</Box>
+					)}
+				</Grid>
+			)}
 			<ModalDelete
 				isOpen={isOpen}
 				onClose={onClose}
@@ -179,9 +196,26 @@ export default function Dashboard() {
 				isCentered
 			>
 				<ModalOverlay />
-				<ModalContent minH={'58px'} minW="490px">
+				<ModalContent
+					data-cy="modal-information"
+					minH={'58px'}
+					minW="490px"
+				>
 					<ModalBody display="flex" alignItems={'center'}>
-						<Text>Activity berhasil dihapus</Text>
+						<Image
+							data-cy="modal-information-icon"
+							src="/static/icons/modal-information-icon.svg"
+							alt="modal-information-icon"
+							mr="10px"
+						/>
+						<Text
+							data-cy="modal-information-title"
+							fontSize="14px"
+							fontWeight="medium"
+							color="#111111"
+						>
+							Activity berhasil dihapus
+						</Text>
 					</ModalBody>
 				</ModalContent>
 			</Modal>

@@ -3,6 +3,7 @@ import React from 'react';
 import { priorityList } from '../../constants/priority';
 
 export default function TodoItem({
+	dataCy,
 	id: idTodo,
 	is_active,
 	priority,
@@ -14,6 +15,7 @@ export default function TodoItem({
 }) {
 	return (
 		<Box
+			data-cy={dataCy}
 			height="80px"
 			bg="#FFFFFF"
 			boxShadow={`0px 6px 10px rgba(0, 0, 0, .1)`}
@@ -26,6 +28,7 @@ export default function TodoItem({
 		>
 			<Box display="flex" gap="16px" alignItems="center">
 				<Checkbox
+					data-cy="todo-item-checkbox"
 					width="20px"
 					height="20px"
 					colorScheme="prime"
@@ -33,6 +36,7 @@ export default function TodoItem({
 					onChange={(e) => handleCheck(idTodo)}
 				/>
 				<Text
+					data-cy="todo-item-priority-indicator"
 					as="span"
 					display="inline-block"
 					width="9px"
@@ -43,6 +47,7 @@ export default function TodoItem({
 					}
 				></Text>
 				<Text
+					data-cy="todo-item-title"
 					textStyle="h3"
 					fontWeight="medium"
 					color={is_active && '#888888'}
@@ -51,6 +56,7 @@ export default function TodoItem({
 					{title}
 				</Text>
 				<Image
+					data-cy="todo-item-edit-button"
 					src="/static/icons/todo-title-edit-button.svg"
 					alt="todo-item-edit-button"
 					width="20px"
@@ -60,6 +66,7 @@ export default function TodoItem({
 				/>
 			</Box>
 			<Image
+				data-cy="todo-item-delete-button"
 				src="/static/icons/delete.svg"
 				alt="todo-item-delete-button"
 				cursor="pointer"

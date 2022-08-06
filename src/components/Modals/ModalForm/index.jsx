@@ -57,17 +57,23 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 			>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<ModalHeader
+						data-cy="modal-add-title"
 						textStyle="h3"
 						borderBottom={`1px solid #E5E5E5`}
 						p={`30px 24px 19px`}
 					>
-						{data?.title ? 'Edit Item' : 'Tambah List Item'}
+						{type === 'edit' ? 'Edit Item' : 'Tambah List Item'}
 					</ModalHeader>
-					<ModalCloseButton top="25px" right="25px" />
+					<ModalCloseButton
+						data-cy="modal-add-close-button"
+						top="25px"
+						right="25px"
+					/>
 
 					<ModalBody p={`38px 30px 23px`}>
 						<FormControl mb={26}>
 							<FormLabel
+								data-cy="modal-add-name-title"
 								htmlFor="title"
 								fontSize={'12px'}
 								fontWeight={'semibold'}
@@ -75,6 +81,7 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 								NAMA LIST ITEM
 							</FormLabel>
 							<Input
+								data-cy="modal-add-name-input"
 								id="title"
 								placeholder="Tambahkan nama list item"
 								{...register('title', {
@@ -90,6 +97,7 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 						</FormControl>
 						<FormControl width={'205px'}>
 							<FormLabel
+								data-cy="modal-add-priority-title"
 								htmlFor="priority"
 								fontSize={'12px'}
 								fontWeight={'semibold'}
@@ -111,6 +119,7 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 							</datalist> */}
 
 							<Select
+								data-cy="modal-add-priority-dropdown"
 								{...register('priority', {
 									required: false,
 								})}
@@ -124,6 +133,7 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 							>
 								{priorityList.map((priority) => (
 									<option
+										data-cy={priority.dataCy}
 										key={priority.key}
 										value={priority.key}
 									>
@@ -139,7 +149,7 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 						p={`15px 24px 19px`}
 					>
 						<Button
-							data-cy="activity-add-button"
+							data-cy="modal-add-save-button"
 							minW="150px"
 							height="54px"
 							bg={'prime.900'}
@@ -149,7 +159,10 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 							fontWeight="semibold"
 							px="22px"
 							py="13.5px"
-							disabled={type === 'add' && !dirtyFields.title}
+							disabled={
+								type === 'add' &&
+								(!dirtyFields.title || !dirtyFields.priority)
+							}
 							type="submit"
 						>
 							Simpan
