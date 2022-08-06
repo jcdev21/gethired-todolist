@@ -226,7 +226,7 @@ export default function Item() {
 				<Box display="flex" gap="18px">
 					<Menu>
 						<MenuButton
-							data-cy="todo-sort-button"
+							data-cy="sort-selection"
 							as={IconButton}
 							icon={<IconSort />}
 							colorScheme="grey"
