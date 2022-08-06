@@ -8,6 +8,10 @@ import {
 	MenuButton,
 	MenuItem,
 	MenuList,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalOverlay,
 	Spinner,
 	Text,
 	useDisclosure,
@@ -22,7 +26,6 @@ import TodoItem from '../../components/TodoItem';
 import { sortList as initialSortList } from '../../constants/sort';
 
 export default function Item() {
-	console.log('iiiiiEm');
 	let params = useParams();
 	let { id } = params;
 	const [activity, setActivity] = React.useState({});
@@ -40,6 +43,11 @@ export default function Item() {
 		isOpen: isOpenModalForm,
 		onOpen: onOpenModalForm,
 		onClose: onCloseModalForm,
+	} = useDisclosure();
+	const {
+		isOpen: isOpenAlert,
+		onOpen: onOpenAlert,
+		onClose: onCloseAlert,
 	} = useDisclosure();
 	let navigate = useNavigate();
 
@@ -66,6 +74,7 @@ export default function Item() {
 		try {
 			await destroy(todoSelected.id);
 			await getDetailActivity();
+			onOpenAlert();
 		} catch (error) {
 			console.log(error);
 		}
@@ -278,7 +287,7 @@ export default function Item() {
 					<Spinner color="prime.900" size="lg" />
 				</Box>
 			) : (
-				<Box marginBottom="50px">
+				<Box data-cy="todo-item" marginBottom="50px">
 					{todos.length > 0 ? (
 						todos.map((data, i) => (
 							<TodoItem
@@ -319,6 +328,36 @@ export default function Item() {
 				data={todoSelected}
 				type={Object.keys(todoSelected).length ? 'edit' : 'add'}
 			/>
+			<Modal
+				data-cy="modal-information"
+				isOpen={isOpenAlert}
+				onClose={onCloseAlert}
+				isCentered
+			>
+				<ModalOverlay />
+				<ModalContent
+					data-cy="modal-information"
+					minH={'58px'}
+					minW="490px"
+				>
+					<ModalBody display="flex" alignItems={'center'}>
+						<Image
+							data-cy="modal-information-icon"
+							src="/static/icons/modal-information-icon.svg"
+							alt="modal-information-icon"
+							mr="10px"
+						/>
+						<Text
+							data-cy="modal-information-title"
+							fontSize="14px"
+							fontWeight="medium"
+							color="#111111"
+						>
+							Activity berhasil dihapus
+						</Text>
+					</ModalBody>
+				</ModalContent>
+			</Modal>
 		</>
 	);
 }
