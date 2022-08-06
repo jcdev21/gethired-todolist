@@ -9,7 +9,7 @@ const Item = React.lazy(() => import('./pages/Item'));
 function App() {
 	return (
 		<Router>
-			<Header title="To Do List App" />
+			<Header title="TO DO LIST APP" />
 			<Container maxW="5xl">
 				<Routes>
 					<Route

@@ -105,7 +105,6 @@ export default function Dashboard() {
 				</Box>
 			) : (
 				<Grid
-					data-cy="activity-item"
 					templateColumns={
 						dataActivity.length > 0 ? `repeat(4, 1fr)` : '1fr'
 					}
@@ -116,7 +115,7 @@ export default function Dashboard() {
 					{dataActivity.length > 0 ? (
 						dataActivity.map((data, i) => (
 							<Card
-								dataCy={`activity-item-${i}`}
+								dataCy={`activity-item`}
 								handleClick={() =>
 									navigate(`/item-list/${data.id}`)
 								}
