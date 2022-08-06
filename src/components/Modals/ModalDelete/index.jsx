@@ -13,13 +13,8 @@ import React from 'react';
 export function ModalDelete({ isOpen, onClose, onAction, content }) {
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} isCentered>
-			<ModalOverlay />
-			<ModalContent
-				data-cy="modal-delete"
-				minW="490px"
-				minH="355px"
-				borderRadius="12px"
-			>
+			<ModalOverlay data-cy="modal-delete" />
+			<ModalContent minW="490px" minH="355px" borderRadius="12px">
 				<ModalBody>
 					<Image
 						data-cy="modal-delete-icon"

@@ -224,9 +224,9 @@ export default function Item() {
 					/>
 				</Box>
 				<Box display="flex" gap="18px">
-					<Menu>
+					<Menu data-cy="sort-selection">
 						<MenuButton
-							data-cy="sort-selection"
+							data-cy={`todo-sort-button`}
 							as={IconButton}
 							icon={<IconSort />}
 							colorScheme="grey"
@@ -237,9 +237,9 @@ export default function Item() {
 							borderRadius="50%"
 						/>
 						<MenuList width="235px">
-							{sortList.map((sort) => (
+							{sortList.map((sort, i) => (
 								<MenuItem
-									data-cy="todo-sort-button"
+									data-cy={sort.dataCy}
 									key={sort.title}
 									display="flex"
 									justifyContent="space-between"
