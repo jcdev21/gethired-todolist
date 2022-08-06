@@ -239,7 +239,7 @@ export default function Item() {
 						<MenuList width="235px">
 							{sortList.map((sort) => (
 								<MenuItem
-									data-cy={sort.dataCy}
+									data-cy="todo-sort-button"
 									key={sort.title}
 									display="flex"
 									justifyContent="space-between"
