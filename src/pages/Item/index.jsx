@@ -101,7 +101,7 @@ export default function Item() {
 				return 0;
 			});
 		} else if (sortTitle === 'Belum Selesai') {
-			result = tempTodo.sort((a, b) => a.is_active - b.is_active);
+			result = tempTodo.sort((a, b) => b.is_active - a.is_active);
 		}
 
 		const newSortList = sortList.map((sort, i) => {
