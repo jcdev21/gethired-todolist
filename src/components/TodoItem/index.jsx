@@ -33,6 +33,7 @@ export default function TodoItem({
 					height="20px"
 					colorScheme="prime"
 					isChecked={is_active}
+					checked={is_active}
 					onChange={(e) => handleCheck(idTodo)}
 				/>
 				<Text
