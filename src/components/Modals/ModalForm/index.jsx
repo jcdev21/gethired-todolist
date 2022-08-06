@@ -1,9 +1,15 @@
 import {
+	Box,
 	Button,
 	FormControl,
 	FormErrorMessage,
 	FormLabel,
+	Image,
 	Input,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
 	Modal,
 	ModalBody,
 	ModalCloseButton,
@@ -15,8 +21,9 @@ import {
 	Text,
 } from '@chakra-ui/react';
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { priorityList } from '../../../constants/priority';
+import { Controller, useForm } from 'react-hook-form';
+import { priorityList as dataPriority } from '../../../constants/priority';
+import { IconArrowDown } from '../../Icons';
 
 export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 	const {
@@ -25,6 +32,7 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 		reset,
 		setValue,
 		formState: { dirtyFields },
+		control,
 	} = useForm({
 		defaultValues: {
 			title: '',
@@ -104,43 +112,118 @@ export function ModalForm({ isOpen, onClose, onAction, data, type }) {
 							>
 								PRIORITY
 							</FormLabel>
-							{/* <Input
-								id="priority"
-								list="list-priority"
-								placeholder="Pilih Priority"
-								height="52px"
-								p={`14px 18px`}
-								fontSize={'16px'}
+							<Controller
+								name="priority"
+								control={control}
+								render={({
+									field: { onChange, name, value },
+								}) => (
+									<Menu>
+										<MenuButton
+											data-cy="modal-add-priority-dropdown"
+											as={Button}
+											rightIcon={<IconArrowDown />}
+											id="priority"
+											bg="white"
+											width="224px"
+											height="52px"
+											p={`14px 17px`}
+											fontSize={'16px'}
+											fontWeight="normal"
+											border={`1px solid #E5E5E5`}
+											borderRadius={'6px'}
+											gap={'65px'}
+											_expanded={{
+												bg: 'white',
+												borderColor: 'prime.900',
+											}}
+										>
+											{value === '' ? (
+												'Pilih priority'
+											) : (
+												<Box
+													display={'inline-flex'}
+													alignItems={'center'}
+													gap={'19px'}
+												>
+													<Text
+														as="span"
+														display="inline-block"
+														width="14px"
+														height="14px"
+														borderRadius="14px"
+														backgroundColor={
+															dataPriority.find(
+																(priority) =>
+																	priority.key ===
+																	value
+															).color
+														}
+													></Text>
+													<Text
+														fontSize={'16px'}
+														fontWeight={'normal'}
+													>
+														{
+															dataPriority.find(
+																(priority) =>
+																	priority.key ===
+																	value
+															).label
+														}
+													</Text>
+												</Box>
+											)}
+										</MenuButton>
+										<MenuList>
+											{dataPriority.map((priority, i) => (
+												<MenuItem
+													data-cy="modal-add-priority-item"
+													key={i}
+													display="flex"
+													justifyContent="space-between"
+													alignItems="center"
+													px="17px"
+													py="14px"
+													onClick={(_) => {
+														onChange(priority.key);
+													}}
+													name={name}
+													value={value}
+												>
+													<Box
+														display="flex"
+														alignItems="center"
+														gap="19px"
+													>
+														<Text
+															as="span"
+															display="inline-block"
+															width="14px"
+															height="14px"
+															borderRadius="14px"
+															backgroundColor={
+																priority.color
+															}
+														></Text>
+														<Text
+															fontSize={'16px'}
+															fontWeight={
+																'normal'
+															}
+														>
+															{priority.label}
+														</Text>
+													</Box>
+													{priority.key === value && (
+														<Image src="/static/icons/checked.svg" />
+													)}
+												</MenuItem>
+											))}
+										</MenuList>
+									</Menu>
+								)}
 							/>
-							<datalist id="list-priority">
-								<option>OKE asdasd asdasd asdasdas</option>
-								<option>OKE2</option>
-								<option>OKE3</option>
-							</datalist> */}
-
-							<Select
-								data-cy="modal-add-priority-dropdown"
-								{...register('priority', {
-									required: false,
-								})}
-								id="priority"
-								placeholder="Pilih Priority"
-								height="52px"
-								fontSize={'16px'}
-								border={`1px solid #E5E5E5`}
-								focusBorderColor="prime.900"
-								borderRadius={'6px'}
-							>
-								{priorityList.map((priority) => (
-									<option
-										data-cy={priority.dataCy}
-										key={priority.key}
-										value={priority.key}
-									>
-										{priority.label}
-									</option>
-								))}
-							</Select>
 						</FormControl>
 					</ModalBody>
 

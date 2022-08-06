@@ -143,7 +143,6 @@ export default function Item() {
 	};
 
 	const handleActionModalForm = async (dataForm) => {
-		// console.log(todoSelected);
 		onCloseModalForm();
 		try {
 			if (todoSelected.id) await update(todoSelected.id, dataForm);
@@ -224,9 +223,9 @@ export default function Item() {
 					/>
 				</Box>
 				<Box display="flex" gap="18px">
-					<Menu data-cy="sort-selection">
+					<Menu>
 						<MenuButton
-							data-cy={`todo-sort-button`}
+							data-cy="todo-sort-button"
 							as={IconButton}
 							icon={<IconSort />}
 							colorScheme="grey"
@@ -239,7 +238,7 @@ export default function Item() {
 						<MenuList width="235px">
 							{sortList.map((sort, i) => (
 								<MenuItem
-									data-cy={sort.dataCy}
+									data-cy={`sort-selection`}
 									key={sort.title}
 									display="flex"
 									justifyContent="space-between"
@@ -250,12 +249,15 @@ export default function Item() {
 								>
 									<Box display="flex" alignItems="center">
 										<Image
+											data-cy="sort-selection-icon"
 											src={sort.icon}
 											mr="15px"
 											width="18px"
 											height="18px"
 										/>
-										<Text>{sort.title}</Text>
+										<Text data-cy="sort-selection-title">
+											{sort.title}
+										</Text>
 									</Box>
 									{sort.isChecked && (
 										<Image src="/static/icons/checked.svg" />
