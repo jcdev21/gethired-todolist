@@ -1,7 +1,7 @@
 import axios from './axios.instance';
 
 export async function store(data) {
-	return await axios.post(`/todo-items`, { ...data, is_active: false });
+	return await axios.post(`/todo-items`, { ...data, is_active: true });
 }
 
 export async function update(id, dataUpdate) {

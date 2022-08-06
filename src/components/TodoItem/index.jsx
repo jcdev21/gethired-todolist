@@ -32,8 +32,7 @@ export default function TodoItem({
 					width="20px"
 					height="20px"
 					colorScheme="prime"
-					isChecked={is_active}
-					checked={is_active}
+					isChecked={!is_active}
 					onChange={(e) => handleCheck(idTodo)}
 				/>
 				<Text
@@ -51,8 +50,8 @@ export default function TodoItem({
 					data-cy="todo-item-title"
 					textStyle="h3"
 					fontWeight="medium"
-					color={is_active && '#888888'}
-					textDecoration={is_active ? 'line-through' : 'none'}
+					color={!is_active && '#888888'}
+					textDecoration={!is_active ? 'line-through' : 'none'}
 				>
 					{title}
 				</Text>
